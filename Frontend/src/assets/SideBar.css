@@ -1,0 +1,97 @@
+/* Sidebar Container */
+.sidebar {
+  height: 100vh;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  transition: width 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+}
+
+.sidebar.open { width: 260px; }
+.sidebar.collapsed { width: 80px; }
+
+/* Header / Logo Section */
+.sidebar-header {
+  padding: 24px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Toggle Button - Positioned on the line */
+.toggle-btn {
+  position: absolute;
+  right: -12px;
+  top: 40px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 4px;
+}
+
+/* Menu Items */
+.menu-nav {
+  padding: 10px;
+  flex-grow: 1; /* Pushes logout to bottom */
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+
+.menu-item:hover { background-color: #f9fafb; }
+
+/* The specific "Home" active style from your image */
+.menu-item.active {
+  background: linear-gradient(to right, #fbbf24, #fcd34d); /* Yellow gradient */
+  color: black;
+  font-weight: 600;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Icon Container - Square look with shadow */
+.icon-wrapper {
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Logout Section - Fixed to bottom */
+.sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.logout-icon {
+  background-color: #fef3c7; /* Pale yellow */
+  color: #92400e;
+  padding: 8px;
+  border-radius: 6px;
+  margin-right: 16px;
+}
