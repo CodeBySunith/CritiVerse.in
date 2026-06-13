@@ -66,30 +66,28 @@ export const AddGameFromRAWGAPI = async (rawgId) => {
     return res.json();
 };
 
-export const GetAllUsersAPI = async () => {
-    try {
-        const res = await fetch(`${baseUrl}/user/getallusers`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        return await res.json();
-    } catch (e) {
-        console.error("Failed to fetch users", e);
-        return { users: [] };
-    }
+
+export const GetAllUsersAPI = async (page = 1) => {
+  try {
+    const res = await fetch(`${baseUrl}/user/getallusers?page=${page}`);
+    return await res.json();
+  } catch (e) {
+    console.error("Failed to fetch users", e);
+    return { users: [], totalpages: 1 };
+  }
 };
 
+export const GetAllGamesAdminAPI = async (page = 1) => {
+  try {
+    const res = await fetch(`${baseUrl}/game/showallgamesadmin?page=${page}`, {
+      method: 'GET'
+    });
 
-export const GetAllGamesAdminAPI = async () => {
-    try {
-        const res = await fetch(`${baseUrl}/game/showallgames`, { 
-            method: 'GET'
-        });
-        return await res.json();
-    } catch (e) {
-        console.error("Failed to fetch games", e);
-        return { games: [] };
-    }
+    return await res.json();
+  } catch (e) {
+    console.error("Failed to fetch games", e);
+    return { games: [], totalpages: 1 };
+  }
 };
 
 

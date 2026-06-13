@@ -14,6 +14,7 @@ Router.put('/updategame/:id',Auth,isBanned,RoleMW(["admin","moderator"]),Gamecon
 Router.post('/addgamesAPI',Auth,isBanned,RoleMW(["admin","moderator"]),Gamecontroller.ImportGameFromRAWG)
 
 Router.get('/showallgames',Gamecontroller.GetAllGames)
+Router.get('/showallgamesadmin',Gamecontroller.GetAllGamesAdmin)
 Router.get('/newreleases',Gamecontroller.GetNewGames)
 Router.get('/topratedgames',Gamecontroller.GetTopGames)
 Router.get('/singlegame/:id',Gamecontroller.GetSingleGame)

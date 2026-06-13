@@ -6,21 +6,28 @@ import Footer from '../../components/Footer/Footer';
 const ManageGamesView = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+const [totalpage, setTotalpage] = useState(1);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      setLoading(true);
-      const data = await GetAllGamesAdminAPI();
-      
-      if (data && data.games) {
-        setGames(data.games);
-      } else if (Array.isArray(data)) {
-        setGames(data); 
-      }
-      setLoading(false);
-    };
-    fetchGames();
-  }, []);
+  const fetchGames = async () => {
+    setLoading(true);
+
+    const data = await GetAllGamesAdminAPI(page);
+
+    if (data && Array.isArray(data.games)) {
+      setGames(data.games);
+      setTotalpage(data.totalpages || 1);
+    } else {
+      setGames([]);
+      setTotalpage(1);
+    }
+
+    setLoading(false);
+  };
+
+  fetchGames();
+}, [page]);
 
   const handleDelete = async (gameId, gameTitle) => {
     const confirmDelete = window.confirm(`Are you absolutely sure you want to delete "${gameTitle}"? This cannot be undone.`);
@@ -69,7 +76,7 @@ const ManageGamesView = () => {
               games.map((game) => (
                 <tr
                   key={game._id}
-                  className="border-b border-[#333] hover:bg-[#1a1a1a] transition-colors"
+                  className="border-b border-[#333]"
                 >
                   <td className="p-4">
                     <img
@@ -108,10 +115,33 @@ const ManageGamesView = () => {
             )}
           </tbody>
         </table>
+
+      <div className="flex gap-4 items-center justify-center py-6">
+  
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(prev => prev - 1)}
+          className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
+        >
+          Prev
+        </button>
+
+        <span className="text-white font-bold text-lg">
+          {page}
+        </span>
+
+        <button
+          disabled={page === totalpage}
+          onClick={() => setPage(prev => prev + 1)}
+          className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
+        >
+          Next
+        </button>
+
+      </div>
       </div>
     </div>
 
-    {/* Mobile Cards */}
     <div className="md:hidden space-y-4">
 
       {games.length === 0 ? (
@@ -176,18 +206,28 @@ const ManageGamesView = () => {
 const ManageUsersView = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalpage, setTotalpage] = useState(1);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      const data = await GetAllUsersAPI();
-      if (data && data.users) {
-        setUsers(data.users);
-      }
-      setLoading(false);
-    };
-    fetchUsers();
-  }, []);
+  const fetchUsers = async () => {
+    setLoading(true);
+
+    const data = await GetAllUsersAPI(page);
+
+    if (data && Array.isArray(data.users)) {
+      setUsers(data.users);
+      setTotalpage(data.totalpages || 1);
+    } else {
+      setUsers([]);
+      setTotalpage(1);
+    }
+
+    setLoading(false);
+  };
+
+  fetchUsers();
+}, [page]);
 
   const handleBanToggle = async (userId) => {
     const res = await ToggleBanUserAPI(userId);
@@ -224,7 +264,7 @@ const ManageUsersView = () => {
             {users.map((user) => (
               <tr
                 key={user._id}
-                className="border-b border-[#333] hover:bg-[#1a1a1a]"
+                className="border-b border-[#333]"
               >
                 <td className="p-4 font-bold text-white">
                   {user.username}
@@ -270,6 +310,31 @@ const ManageUsersView = () => {
             ))}
           </tbody>
         </table>
+
+            <div className="flex gap-4 items-center justify-center py-6">
+
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(prev => prev - 1)}
+                className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              <span className="text-white font-bold text-lg">
+                {page}
+              </span>
+
+              <button
+                disabled={page === totalpage}
+                onClick={() => setPage(prev => prev + 1)}
+                className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
+              >
+                Next
+              </button>
+
+            </div>
+
       </div>
     </div>
 
@@ -413,25 +478,8 @@ const AdminDashboard = () => {
 
     <div className="flex flex-col lg:flex-row min-h-screen bg-bgclr text-white font-sans">
 
-      {/* Sidebar */}
       <div
-        className="
-          w-full
-          lg:w-64
-          bg-navbgclr
-          p-4
-          lg:p-6
-          flex
-          lg:flex-col
-          flex-row
-          gap-2
-          overflow-x-auto
-          border-b
-          lg:border-b-0
-          lg:border-r
-          border-white/10
-        "
-      >
+        className=" w-full lg:w-64 bg-navbgclr p-4 lg:p-6 flex lg:flex-col flex-row gap-2 overflow-x-auto border-b lg:border-b-0 lg:border-r border-white/10">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`${getTabClass('dashboard')} min-w-fit`}
@@ -510,22 +558,14 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 'addGames' && (
-            <div className="animate-fade-in space-y-6">
+            <div className="animate-fade-in space-y-">
 
               <h1 className="text-2xl md:text-3xl font-bold">
                 Add a New Game
               </h1>
 
               <div
-                className="
-                  bg-navbgclr
-                  p-6
-                  rounded-xl
-                  border
-                  border-[#00e6e6]
-                  max-w-xl
-                  mx-auto
-                "
+                className="bg-navbgclr p-6 rounded-xl max-w-xl mt-20 mx-auto"
               >
                 <p className="text-[#b3b3b3] mb-4">
                   Enter a RAWG Game ID to fetch and add to the database.
@@ -537,38 +577,16 @@ const AdminDashboard = () => {
                 >
                   <input
                     type="number"
-                    placeholder="e.g., 3498"
                     value={rawgId}
                     onChange={(e) => setRawgId(e.target.value)}
                     disabled={importLoading}
-                    className="
-                      flex-1
-                      bg-[#1a1a1a]
-                      border
-                      border-[#333]
-                      p-3
-                      rounded-lg
-                      text-white
-                      outline-none
-                      focus:border-[#00e6e6]
-                    "
+                    className=" flex-1 bg-[#1a1a1a] border border-[#333]  p-3 rounded-lg text-white outline-none focus:border-[#00e6e6]"
                   />
 
                   <button
                     type="submit"
                     disabled={importLoading}
-                    className="
-                      bg-[#00e6e6]
-                      text-[#1a1e24]
-                      font-bold
-                      px-5
-                      py-3
-                      rounded-lg
-                      transition-all
-                      duration-300
-                      hover:opacity-90
-                      disabled:bg-gray-500
-                    "
+                    className="bg-[#00e6e6] text-[#1a1e24] font-bold px-5 py-3 rounded-lg transition-all duration-300 hover:opacity-90 disabled:bg-gray-500"
                   >
                     {importLoading ? "Fetching..." : "Fetch & Save"}
                   </button>

@@ -9,6 +9,7 @@ import { useAuth } from '../Context/AuthContext';
 import { FaPen, FaXmark, FaCheck } from 'react-icons/fa6'
 import Navbar from '../components/Navbar/Navbar'
 import Footer from '../components/Footer/Footer'
+import RatingStars from '../components/Cards/RatingStars'
 
 const GamePage = () => {
   const { id } = useParams(); 
@@ -17,6 +18,10 @@ const GamePage = () => {
   const [gameReviews, setGameReviews] = useState([]); 
   const [myreview, setMyreview] = useState(null); 
   const [loadingMyReview, setLoadingMyReview] = useState(true);
+
+  const [rating, setRating] = useState(0);
+  const [originalReview, setOriginalReview] = useState(null);
+const [originalRating, setOriginalRating] = useState(0);
 
   const [showForm, setShowForm] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
@@ -37,11 +42,20 @@ const GamePage = () => {
       if (myreviewData && myreviewData.review){
         setMyreview(myreviewData.review);
         setReviewInput(myreviewData.review.review || ""); 
-      } else {
-        setMyreview(null);
-        setReviewInput("");
-      }
+        setRating(myreviewData.review.rating || 0);
 
+        setOriginalReview(myreviewData.review.review || "");
+        setOriginalRating(myreviewData.review.rating || 0);
+      } else {
+              setMyreview(null);
+              setReviewInput("");
+              setRating(0);
+
+              setOriginalReview("");
+              setOriginalRating(0);
+            }
+      
+      
     } catch (error) {
       console.error("Error fetching page layout data:", error);
     } finally {
@@ -53,26 +67,30 @@ const GamePage = () => {
     getGamesData();
   }, [id]);
 
+
   const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    if (!reviewInput.trim()) return;
-    setIsSubmitting(true);
+  e.preventDefault();
+  if (!reviewInput.trim()) return;
 
-    let res;
-    if (myreview) {
-      res = await EditReviewAPI(id, reviewInput);
-    } else {
-      res = await CreateReviewAPI(id, reviewInput);
-    }
+  setIsSubmitting(true);
 
-    if (res && res.success) {
-      setShowForm(false);
-      await getGamesData(); 
-    } else {
-      alert(res?.msg || res?.message || "Something went wrong.");
-    }
-    setIsSubmitting(false);
-  };
+  let res;
+
+  if (myreview) {
+    res = await EditReviewAPI(id, reviewInput, rating);
+  } else {
+    res = await CreateReviewAPI(id, reviewInput, rating);
+  }
+
+  if (res && res.success) {
+  setShowForm(false);
+  await getGamesData();
+  } else {
+    alert(res?.msg || res?.message || "Something went wrong.");
+  }
+
+  setIsSubmitting(false);
+};
 
   const filteredCommunityReviews = gameReviews.filter(
     (item) => item.userid?._id !== user?._id
@@ -89,37 +107,36 @@ const GamePage = () => {
           <h2 className='text-white text-xl font-bold'>Your Review</h2>
           
           {user ? (
-            !loadingMyReview && (
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className='flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded-md font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24]'
-              >
-                {showForm ? (
-                  <>
-                    <FaXmark className='text-lg mb-1' />
-                    <span className='text-[10px] uppercase tracking-wider'>Cancel</span>
-                  </>
-                ) : myreview ? (
-                  <>
-                    <FaPen className='text-md mb-1.5' />
-                    <span className='text-[10px] uppercase tracking-wider'>Edit Review</span>
-                  </>
-                ) : (
-                  <>
-                    <FaPen className='text-md mb-1.5' />
-                    <span className='text-[10px] uppercase tracking-wider'>Write Review</span>
-                  </>
-                )}
-              </button>
-            )
-          ) : (
-            <Link 
-              to="/login" 
-              className='flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded-md font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24] cursor-pointer min-w-22.5 text-center'
-            >
-              <span className='text-[10px] uppercase tracking-wider py-2'>Login to Write Review</span>
-            </Link>
-          )}
+  !loadingMyReview && !showForm && (
+    <button
+      onClick={() => {
+        setShowForm(true);
+      }}
+      className='flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded-md font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24]'
+    >
+      {myreview ? (
+        <>
+          <FaPen className='text-md mb-1.5' />
+          <span className='text-[10px] uppercase tracking-wider'>Edit review</span>
+        </>
+      ) : (
+        <>
+          <FaPen className='text-md mb-1.5' />
+          <span className='text-[10px] uppercase tracking-wider'>Write a review</span>
+        </>
+      )}
+    </button>
+  )
+) : (
+  <Link 
+    to="/login" 
+    className='flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded-md font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24] cursor-pointer min-w-22.5 text-center'
+  >
+    <span className='text-[10px] uppercase tracking-wider py-2'>
+      Write a review
+    </span>
+  </Link>
+)}
         </div>
 
         {showForm && user && (
@@ -127,8 +144,17 @@ const GamePage = () => {
             <h3 className="text-[#00e6e6] text-sm font-semibold tracking-wide uppercase text-[11px]">
               {myreview ? "Update Your Existing Review" : "Write Your Review for this Game"}
             </h3>
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-gray-400 uppercase">Your Rating</p>
+
+              <RatingStars
+                currentRating={rating}
+                onRatingSelect={(value) => setRating(value)}
+                disabled={false}
+              />
+            </div>
             <textarea
-              className="w-full bg-neutral-900/80 text-white p-4 rounded-lg border border-neutral-800 text-sm focus:outline-none focus:border-[#00e6e6] placeholder-neutral-500 transition duration-200"
+              className="w-full bg-black/40 text-white p-4 rounded-lg border border-neutral-800 text-sm focus:outline-none focus:border-[#00e6e6] placeholder-neutral-500 transition duration-200"
               rows="5"
               placeholder="What did you like or dislike about this game?"
               value={reviewInput}
@@ -160,7 +186,7 @@ const GamePage = () => {
         
         {loadingMyReview ? (
           <div className="text-gray-400 p-4 bg-navbgclr rounded-lg border border-white/5 text-center text-sm">
-            Checking database records...
+            Loading...
           </div>
         ) : myreview ? (
           <div className="max-w-full">

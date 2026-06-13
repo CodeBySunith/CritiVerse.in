@@ -258,12 +258,32 @@ const UserCount = async (req, res) => {
 
 
 const GetAllUsers = async (req, res) => {
-    try {
-        const users = await UserDB.find().select('-password').sort({ createdAt: -1 });
-        return res.status(200).json({ users: users });
-    } catch (error) {
-        return res.status(500).json({ msg: "Server Error" });
-    }
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const skip = (page - 1) * limit;
+
+    const [users, totalDocuments] = await Promise.all([
+      UserDB.find({})
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      UserDB.countDocuments({})
+    ]);
+
+    return res.status(200).json({
+      users,
+      totalpages: Math.ceil(totalDocuments / limit) || 1,
+      page
+    });
+
+  } catch (e) {
+    return res.status(500).json({
+      msg: "Failed to fetch users",
+      error: e.message
+    });
+  }
 };
 
 const ToggleBanUser = async (req, res) => {

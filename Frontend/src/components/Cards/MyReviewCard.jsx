@@ -1,4 +1,5 @@
 import React from 'react'
+import {FaStar} from 'react-icons/fa6'
 
 const Reviewcard = ({ review }) => {
 
@@ -10,6 +11,19 @@ const Reviewcard = ({ review }) => {
        <div className='flex gap-4 pb-5'>
 
         <div className='flex flex-col gap-y-1.5 p-2.5 w-full'>
+
+          <div className='flex items-center gap-1 my-2'>
+            {[...Array(10)].map((_, index) => (
+              <FaStar
+                key={index}
+                className={`text-xs ${
+                  index < (review.rating || 0)
+                    ? 'text-[#00e6e6]'
+                    : 'text-neutral-700'
+                }`}
+              />
+            ))}
+          </div>
       
             <div>
               <p className='line-clamp-4 text-sm text-secText font-light leading-relaxed'>

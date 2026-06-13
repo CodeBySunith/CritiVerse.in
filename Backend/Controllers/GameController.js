@@ -353,10 +353,40 @@ const GameCount = async (req, res) => {
     
 }
 
+const GetAllGamesAdmin = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const skip = (page - 1) * limit;
+
+    const [games, totalDocuments] = await Promise.all([
+      GameDB.find({})
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      GameDB.countDocuments({})
+    ]);
+
+    return res.status(200).json({
+      games,
+      totalpages: Math.ceil(totalDocuments / limit) || 1,
+      page
+    });
+
+  } catch (e) {
+    return res.status(500).json({
+      msg: "Failed to retrieve games",
+      error: e.message
+    });
+  }
+};
+
 module.exports = {
     AddGame,
     UpdateGame,
     GetAllGames,
+    GetAllGamesAdmin,
     GetSingleGame,
     DeleteGame,
     ImportGameFromRAWG,

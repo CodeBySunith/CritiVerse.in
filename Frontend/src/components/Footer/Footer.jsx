@@ -32,9 +32,9 @@ const Footer = () => {
                 </ul>
                 </div>
                 <div>
-                    <h3 className='text-sm md:text-xl'>A Thattikoottu Company</h3>
+                    <h3 className='text-sm md:text-xl'>A CodexLeo Company</h3>
                 </div>
-                <p className='text-xs md:text-lg'>© 2024 - 2026 by CritiVerse.com, Inc.</p>
+                <p className='text-xs md:text-lg'>© 2026 by CritiVerse.com, Inc.</p>
             </div>
 
         </footer>

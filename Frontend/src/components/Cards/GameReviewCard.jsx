@@ -11,6 +11,22 @@ const GameReviewCard = ({ review }) => {
 
     
       <div className='pb-4 flex flex-col gap-y-1.5 text-left w-full'>
+        {review.rating && (
+  <div className='flex items-center gap-1 my-2'>
+
+    {[...Array(10)].map((_, index) => (
+      <FaStar
+        key={index}
+        className={`text-[8px] md:text-xs ${
+          index < review.rating
+            ? 'text-[#00e6e6]'
+            : 'text-neutral-700'
+        }`}
+      />
+    ))}
+
+  </div>
+)}
         <p className='text-sm text-secText font-light leading-relaxed whitespace-pre-line'>
           {review.review || "No review content provided."}
         </p>
@@ -34,22 +50,7 @@ const GameReviewCard = ({ review }) => {
                 </h1>
               </div>
             </Link>
-              {review.rating && (
-  <div className='flex items-center justify-center gap-1 pl-12'>
-
-    {[...Array(10)].map((_, index) => (
-      <FaStar
-        key={index}
-        className={`text-[8px] md:text-xs ${
-          index < review.rating
-            ? 'text-[#00e6e6]'
-            : 'text-neutral-700'
-        }`}
-      />
-    ))}
-
-  </div>
-)}
+              
             <div className='flex pt-1 pl-12'>
                 <p className='text-secText text-xs'>
                   {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}

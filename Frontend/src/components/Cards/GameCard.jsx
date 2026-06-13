@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { FaStar, FaPlus, FaCheck, FaHeart, FaPenToSquare, FaPen } from 'react-icons/fa6'
+import { FaStar, FaPlus, FaCheck, FaHeart, } from 'react-icons/fa6'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GetSingleGame } from '../../api/GameAPI'
 import { GetGameTrackingAPI, ToggleStatusAPI, ToggleFavoriteAPI } from '../../api/ListAPI'
 import { useAuth } from '../../Context/AuthContext'
-import RatingStars from './RatingStars'
-import {GetMyGameReview,CreateReviewAPI,EditReviewAPI} from '../../api/ReviewAPI'
 
 const GameCard = () => {
   const { id } = useParams();
@@ -14,10 +12,7 @@ const GameCard = () => {
 
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showRatingModal, setShowRatingModal] = useState(false);
-  const [rating, setRating] = useState(0);
   
- 
   const [status, setStatus] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -55,23 +50,6 @@ const GameCard = () => {
     }
   }, [id, user]);
 
-  useEffect(() => {
-  const fetchUserRating = async () => {
-    if (!user || !id) return;
-
-    try {
-      const res = await GetMyGameReview(id);
-
-      if (res?.review?.rating) {
-        setRating(res.review.rating);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  fetchUserRating();
-}, [id, user]);
 
   const handleStatusToggle = async (target) => {
     if (!user) {
@@ -95,46 +73,10 @@ const GameCard = () => {
     }
   };
 
-  const handleSaveRating = async () => {
-  try {
-
-    const existingReview = await GetMyGameReview(id);
-
-    let res;
-
-    if (existingReview?.review) {
-
-      res = await EditReviewAPI(
-        id,
-        existingReview.review.review || "",
-        rating
-      );
-
-    } else {
-
-      res = await CreateReviewAPI(
-        id,
-        "",
-        rating
-      );
-
-    }
-
-    if (res.success) {
-      setShowRatingModal(false);
-
-      const updatedGame = await GetSingleGame(id);
-      setGame(updatedGame);
-    }
-
-  } catch (error) {
-    console.log(error);
-  }
-};
 
   if (loading) {
     return (
-      <div className="bg-bgclr min-h-[400px] flex items-center justify-center text-white font-bold">
+      <div className="bg-bgclr min-h-100 flex items-center justify-center text-white font-bold">
         Loading Game Profile...
       </div>
     );
@@ -142,7 +84,7 @@ const GameCard = () => {
 
   if (!game) {
     return (
-      <div className="bg-bgclr min-h-[400px] flex items-center justify-center text-rose-400 font-bold">
+      <div className="bg-bgclr min-h-100 flex items-center justify-center text-rose-400 font-bold">
         Game details could not be found.
       </div>
     );
@@ -272,61 +214,49 @@ const GameCard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-3">
 
-        <button
-          onClick={() => {
-            if (!user) {
-              alert("Please log in to rate this game.");
-              return;
-            }
-            setShowRatingModal(true);
-          }}
-          className="flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] py-3 rounded-lg hover:bg-[#00e6e6] hover:text-black transition"
-        >
-          <FaStar />
-          <span className="text-xs mt-1">
-            {rating > 0 ? `${rating}/10` : "Rate"}
-          </span>
-        </button>
+  <div className="grid grid-cols-2 gap-3">
 
-        <button
-          onClick={handleFavoriteToggle}
-          className={`flex flex-col items-center justify-center py-3 rounded-lg transition ${
-            isFavorite
-              ? 'bg-[#ff007f] text-white'
-              : 'bg-black/40 text-[#ff007f] border border-[#ff007f]'
-          }`}
-        >
-          <FaHeart />
-          <span className="text-xs mt-1">Favorite</span>
-        </button>
+    <button
+      onClick={() => handleStatusToggle('want')}
+      className={`w-full flex flex-col items-center justify-center py-3 rounded-lg transition ${
+        status === 'want'
+          ? 'bg-[#00e6e6] text-black'
+          : 'bg-black/40 text-[#00e6e6] border border-[#00e6e6]'
+      }`}
+    >
+      <FaPlus />
+      <span className="text-xs mt-1">Want</span>
+    </button>
 
-        <button
-          onClick={() => handleStatusToggle('want')}
-          className={`flex flex-col items-center justify-center py-3 rounded-lg transition ${
-            status === 'want'
-              ? 'bg-[#00e6e6] text-black'
-              : 'bg-black/40 text-[#00e6e6] border border-[#00e6e6]'
-          }`}
-        >
-          <FaPlus />
-          <span className="text-xs mt-1">Want</span>
-        </button>
+    <button
+      onClick={() => handleStatusToggle('played')}
+      className={`w-full flex flex-col items-center justify-center py-3 rounded-lg transition ${
+        status === 'played'
+          ? 'bg-[#00e6e6] text-black'
+          : 'bg-black/40 text-[#00e6e6] border border-[#00e6e6]'
+      }`}
+    >
+      <FaCheck />
+      <span className="text-xs mt-1">Played</span>
+    </button>
 
-        <button
-          onClick={() => handleStatusToggle('played')}
-          className={`flex flex-col items-center justify-center py-3 rounded-lg transition ${
-            status === 'played'
-              ? 'bg-[#00e6e6] text-black'
-              : 'bg-black/40 text-[#00e6e6] border border-[#00e6e6]'
-          }`}
-        >
-          <FaCheck />
-          <span className="text-xs mt-1">Played</span>
-        </button>
+  </div>
+  
+  <button
+    onClick={handleFavoriteToggle}
+    className={`w-full flex flex-col items-center justify-center py-3 rounded-lg transition ${
+      isFavorite
+        ? 'bg-[#ff007f] text-white'
+        : 'bg-black/40 text-[#ff007f] border border-[#ff007f]'
+    }`}
+  >
+    <FaHeart />
+    <span className="text-xs mt-1">Favorite</span>
+  </button>
 
-      </div>
+</div>
 
     </div>
 
@@ -349,44 +279,6 @@ const GameCard = () => {
 
       </div>
     
-
-      {showRatingModal && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-
-    <div className="bg-navbgclr border border-[#00e6e6]/20 rounded-xl p-6 w-[90%] max-w-md">
-
-      <div className="flex justify-between items-center mb-4">
-
-        <h2 className="text-white text-lg font-bold">
-          Rate {game.title}
-        </h2>
-
-        <button
-          onClick={() => setShowRatingModal(false)}
-          className="text-gray-400 hover:text-white text-xl"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <RatingStars
-        currentRating={rating}
-        onRatingSelect={(value) => setRating(value)}
-        disabled={false}
-      />
-
-      <button
-        onClick={handleSaveRating}
-        className="w-full mt-5 bg-[#00e6e6] text-black font-bold py-2 rounded-lg"
-      >
-        Save Rating
-      </button>
-
-    </div>
-
-  </div>
-)}
     </div>
   )
 }
