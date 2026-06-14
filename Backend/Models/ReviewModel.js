@@ -26,16 +26,6 @@ rating: {
     default: null
 },
 
-    like: {
-        type: Number,
-        default: 0 
-    },
-
-    dislike: {
-        type: Number,
-        default: 0
-    },
-
 }, { timestamps: true })
 
 ReviewSchema.index({ userid: 1, gameid: 1 }, { unique: true });

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom'; 
 import GameReviewCard from '../components/Cards/GameReviewCard';
 import GameCard from '../components/Cards/GameCard';
-import { GetGameReviewsAPI, GetMyGameReview, CreateReviewAPI, EditReviewAPI } from '../api/ReviewAPI';
+import { GetGameReviewsAPI, GetMyGameReview, CreateReviewAPI, EditReviewAPI, DeleteMyReviewAPI } from '../api/ReviewAPI';
 import Carousel from '../components/Design/Carousel';
 import MyReviewCard from '../components/Cards/MyReviewCard';
 import { useAuth } from '../Context/AuthContext'; 
@@ -21,7 +21,7 @@ const GamePage = () => {
 
   const [rating, setRating] = useState(0);
   const [originalReview, setOriginalReview] = useState(null);
-const [originalRating, setOriginalRating] = useState(0);
+  const [originalRating, setOriginalRating] = useState(0);
 
   const [showForm, setShowForm] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
@@ -49,10 +49,6 @@ const [originalRating, setOriginalRating] = useState(0);
       } else {
               setMyreview(null);
               setReviewInput("");
-              setRating(0);
-
-              setOriginalReview("");
-              setOriginalRating(0);
             }
       
       
@@ -92,6 +88,39 @@ const [originalRating, setOriginalRating] = useState(0);
   setIsSubmitting(false);
 };
 
+const handleDeleteReview = async (gameId) => {
+  try {
+    const confirmDelete = window.confirm(`Are you sure you want to delete this review ? This cannot be undone.`);
+    
+    if (!confirmDelete) return;
+    const res = await DeleteMyReviewAPI(gameId);
+
+    if (res.success) {
+      setGameReviews((prev) =>
+        prev.filter((r) => r.gameid !== gameId)
+      );
+
+      await getGamesData();
+}else {
+      alert(res.msg || "Failed to delete review");
+    }
+  } catch (err) {
+    console.error("Delete error:", err);
+  }
+};
+
+const openEditForm = () => {
+  if (myreview) {
+    setReviewInput(myreview.review || "");
+    setRating(myreview.rating || 0);
+  } else {
+    setReviewInput("");
+    setRating(0);
+  }
+
+  setShowForm(true);
+};
+
   const filteredCommunityReviews = gameReviews.filter(
     (item) => item.userid?._id !== user?._id
   );
@@ -109,9 +138,7 @@ const [originalRating, setOriginalRating] = useState(0);
           {user ? (
   !loadingMyReview && !showForm && (
     <button
-      onClick={() => {
-        setShowForm(true);
-      }}
+      onClick={openEditForm}
       className='flex flex-col items-center justify-center bg-black/40 border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded-md font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24]'
     >
       {myreview ? (
@@ -185,20 +212,21 @@ const [originalRating, setOriginalRating] = useState(0);
         )}
         
         {loadingMyReview ? (
-          <div className="text-gray-400 p-4 bg-navbgclr rounded-lg border border-white/5 text-center text-sm">
-            Loading...
-          </div>
-        ) : myreview ? (
-          <div className="max-w-full">
-            <MyReviewCard review={myreview} />
-          </div>
-        ) : (
-          !showForm && (
-            <div className="text-gray-500 p-8 bg-navbgclr/50 rounded-lg border border-white/5 border-dashed text-center text-sm">
-              You haven't shared your opinion on this game yet.
-            </div>
-          )
-        )}
+  <div className="text-gray-400 p-4 bg-navbgclr rounded-lg border border-white/5 text-center text-sm">
+    Loading...
+  </div>
+) : myreview ? (
+  <div className="max-w-full">
+    <MyReviewCard
+  review={myreview}
+  onDelete={handleDeleteReview}
+/>
+  </div>
+) : showForm ? null : (
+  <div className="text-gray-500 p-8 bg-navbgclr/50 rounded-lg border border-white/5 border-dashed text-center text-sm">
+    You haven't shared your opinion on this game yet.
+  </div>
+)}
       </div>
 
       <h2 className='text-white text-xl font-bold px-1 mt-6 mb-3'>Player Reviews for this Game</h2>

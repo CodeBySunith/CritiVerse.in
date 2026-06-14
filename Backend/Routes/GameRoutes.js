@@ -19,6 +19,11 @@ Router.get('/newreleases',Gamecontroller.GetNewGames)
 Router.get('/topratedgames',Gamecontroller.GetTopGames)
 Router.get('/singlegame/:id',Gamecontroller.GetSingleGame)
 
+Router.get('/toppcgames',Gamecontroller.GetTopPCGames)
+Router.get('/toppsgames',Gamecontroller.GetTopPSGames)
+Router.get('/topxbgames',Gamecontroller.GetTopXBGames)
+Router.get('/topmobilegames',Gamecontroller.GetTopMobileGames)
+
 Router.delete('/deletegame/:id',Auth,isBanned,RoleMW(["admin","moderator"]),Gamecontroller.DeleteGame)
 
 Router.get('/gamecount',Gamecontroller.GameCount)

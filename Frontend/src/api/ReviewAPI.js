@@ -84,3 +84,45 @@ export const GetMyReviewsAPI = async () => {
 
     return await res.json();
 };
+
+
+export const DeleteMyReviewAPI = async (gameId) => {
+  try {
+    const res = await fetch(`${baseUrl}/review/deletereview/${gameId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error(`Server Error: ${res.status}`, data);
+      return { success: false, msg: data.msg || "Error deleting review" };
+    }
+
+    return { success: true, ...data };
+  } catch (e) {
+    console.error("Fetch operation failed:", e);
+    return { success: false, msg: "Network error" };
+  }
+};
+
+
+export const ReportReviewAPI = async (reviewId, reason) => {
+  try {
+    const res = await fetch(`${baseUrl}/review/report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ reviewId, reason }),
+    });
+
+    return await res.json();
+  } catch (err) {
+    return { msg: "Failed to report review" };
+  }
+};
+
+

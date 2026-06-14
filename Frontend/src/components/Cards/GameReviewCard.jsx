@@ -1,8 +1,26 @@
 import React from 'react'
-import { FaThumbsUp, FaThumbsDown, FaFlag, FaStar} from 'react-icons/fa6'
+import {FaStar} from 'react-icons/fa6'
+import { MdOutlineReport } from "react-icons/md";
 import { Link } from 'react-router-dom'
+import { ReportReviewAPI } from '../../api/ReviewAPI'
 
 const GameReviewCard = ({ review }) => {
+
+  const handleReport = async () => {
+
+  const reason = window.prompt(
+    "Why are you reporting this review?"
+  );
+
+  if (!reason || !reason.trim()) return;
+
+  const res = await ReportReviewAPI(
+    review._id,
+    reason.trim()
+  );
+
+  alert(res.msg || "Review reported");
+};
 
   if (!review) return null;
 
@@ -46,14 +64,22 @@ const GameReviewCard = ({ review }) => {
                   alt={review.userid?.name || "User Avatar"} 
                 />
                 <h1 className='text-white md:text-base text-sm font-medium group-hover:text-[#00e6e6] transition-colors'>
-                  {review.userid?.name || "Anonymous User"}
+                  @{review.userid?.username || "Anonymous User"}
                 </h1>
               </div>
             </Link>
               
             <div className='flex pt-1 pl-12'>
-                <p className='text-secText text-xs'>
-                  {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
+                <p className="text-secText text-xs">
+                  {`${review.createdAt === review.updatedAt ? 'Review added on' : 'Review edited on'} ${
+                    review.createdAt
+                      ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : 'Recent'
+                  }`}
                 </p>
             </div>
             
@@ -61,23 +87,18 @@ const GameReviewCard = ({ review }) => {
 
         <div className='flex items-center gap-4 p-2.5 justify-center md:text-base text-sm'>
             <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Like" className="cursor-pointer group">
-                  <FaThumbsUp className='text-zinc-500 group-hover:text-green-500 transition-colors'/>
-                </button>
-                <p className='text-secText text-xs'>{review.like || 0}</p>
-            </div>
-
-            <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Dislike" className="cursor-pointer group">
-                  <FaThumbsDown className='text-zinc-500 group-hover:text-red-500 transition-colors'/>
-                </button>
-                <p className='text-secText text-xs'>{review.dislike || 0}</p>
-            </div>
-
-            <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Report" className="cursor-pointer group">
-                  <FaFlag className='text-zinc-500 group-hover:text-amber-500 transition-colors'/>
-                </button>
+                 <div className='flex items-center gap-4 p-2.5 justify-center md:text-base text-sm'>
+                    <div className='flex gap-x-1.5 items-center'>
+                      <button
+                        aria-label="Report"
+                        onClick={handleReport}
+                      >
+                        <MdOutlineReport
+                          className='text-2xl md:text-3xl text-white hover:text-red-500 transition-colors'
+                        />
+                      </button>
+                    </div>
+                  </div>
             </div>
         </div>
       </div>

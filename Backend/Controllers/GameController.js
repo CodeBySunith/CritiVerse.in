@@ -190,7 +190,7 @@ const GetAllGames = async (req, res) => {
 const GetNewGames = async (req, res) => {
     try {
 
-        const games = await GameDB.find().sort({ createdAt: -1 }).limit(20);
+        const games = await GameDB.find().sort({ rel: -1 }).limit(20);
 
         return res.status(200).json({games});
     } catch (e) {
@@ -202,6 +202,50 @@ const GetTopGames = async (req, res) => {
     try {
 
         const games = await GameDB.find().sort({ averageRating: -1 }).limit(20);
+
+        return res.status(200).json({games});
+    } catch (e) {
+        return res.status(500).json({ msg: "Failed to retrieve games", error: e.message });
+    }
+};
+
+const GetTopPCGames = async (req, res) => {
+    try {
+
+        const games = await GameDB.find({platforms:{$in:['PC']}}).sort({ averageRating: -1 }).limit(20);
+
+        return res.status(200).json({games});
+    } catch (e) {
+        return res.status(500).json({ msg: "Failed to retrieve games", error: e.message });
+    }
+};
+
+const GetTopPSGames = async (req, res) => {
+    try {
+
+        const games = await GameDB.find({platforms:{$in:['PlayStation 5','PlayStation 4','PlayStation 3','PlayStation 2','PlayStation 1']}}).sort({ averageRating: -1 }).limit(20);
+
+        return res.status(200).json({games});
+    } catch (e) {
+        return res.status(500).json({ msg: "Failed to retrieve games", error: e.message });
+    }
+};
+
+const GetTopXBGames = async (req, res) => {
+    try {
+
+        const games = await GameDB.find({platforms:{$in:['Xbox Series X/S','Xbox One','Xbox 360','Xbox']}}).sort({ averageRating: -1 }).limit(20);
+
+        return res.status(200).json({games});
+    } catch (e) {
+        return res.status(500).json({ msg: "Failed to retrieve games", error: e.message });
+    }
+};
+
+const GetTopMobileGames = async (req, res) => {
+    try {
+
+        const games = await GameDB.find({platforms:{$in:['Android','iOS']}}).sort({ averageRating: -1 }).limit(20);
 
         return res.status(200).json({games});
     } catch (e) {
@@ -359,13 +403,26 @@ const GetAllGamesAdmin = async (req, res) => {
     const limit = 15;
     const skip = (page - 1) * limit;
 
+    const search = req.query.search || "";
+
+    let filter = {};
+
+    if (search) {
+      filter = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { developer: { $regex: search, $options: "i" } }
+        ]
+      };
+    }
+
     const [games, totalDocuments] = await Promise.all([
-      GameDB.find({})
+      GameDB.find(filter)
         .skip(skip)
         .limit(limit)
         .lean(),
 
-      GameDB.countDocuments({})
+      GameDB.countDocuments(filter)
     ]);
 
     return res.status(200).json({
@@ -393,6 +450,10 @@ module.exports = {
     GetNewGames,
     Search,
     GetTopGames,
-    GameCount
+    GameCount,
+    GetTopPCGames,
+    GetTopPSGames,
+    GetTopXBGames,
+    GetTopMobileGames
 };
 

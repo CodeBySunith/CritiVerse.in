@@ -67,9 +67,12 @@ export const AddGameFromRAWGAPI = async (rawgId) => {
 };
 
 
-export const GetAllUsersAPI = async (page = 1) => {
+export const GetAllUsersAPI = async (page = 1, search = "") => {
   try {
-    const res = await fetch(`${baseUrl}/user/getallusers?page=${page}`);
+    const res = await fetch(
+      `${baseUrl}/user/getallusers?page=${page}&search=${search}`
+    );
+
     return await res.json();
   } catch (e) {
     console.error("Failed to fetch users", e);
@@ -77,11 +80,14 @@ export const GetAllUsersAPI = async (page = 1) => {
   }
 };
 
-export const GetAllGamesAdminAPI = async (page = 1) => {
+
+
+export const GetAllGamesAdminAPI = async (page = 1, search = "") => {
   try {
-    const res = await fetch(`${baseUrl}/game/showallgamesadmin?page=${page}`, {
-      method: 'GET'
-    });
+    const res = await fetch(
+      `${baseUrl}/game/showallgamesadmin?page=${page}&search=${search}`,
+      { method: "GET" }
+    );
 
     return await res.json();
   } catch (e) {
@@ -112,4 +118,20 @@ export const ToggleBanUserAPI = async (userId) => {
         });
         return await res.json();
     } catch (e) { return { msg: "Network error occurred." }; }
+};
+
+export const GetAllReviewReportsAPI = async (page = 1) => {
+  try {
+    const res = await fetch(
+      `${baseUrl}/review/showreports?page=${page}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+    
+    return await res.json();
+  } catch (err) {
+    return { reports: [] };
+  }
 };

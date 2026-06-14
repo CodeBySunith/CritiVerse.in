@@ -1,402 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ReviewCountAPI, GameCountAPI, UserCountAPI, AddGameFromRAWGAPI, GetAllUsersAPI, ToggleBanUserAPI, GetAllGamesAdminAPI, DeleteGameAPI } from '../../api/AdminAPI'; 
+import { ReviewCountAPI, GameCountAPI, UserCountAPI, AddGameFromRAWGAPI} from '../../api/AdminAPI'; 
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
-
-const ManageGamesView = () => {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-const [totalpage, setTotalpage] = useState(1);
-
-  useEffect(() => {
-  const fetchGames = async () => {
-    setLoading(true);
-
-    const data = await GetAllGamesAdminAPI(page);
-
-    if (data && Array.isArray(data.games)) {
-      setGames(data.games);
-      setTotalpage(data.totalpages || 1);
-    } else {
-      setGames([]);
-      setTotalpage(1);
-    }
-
-    setLoading(false);
-  };
-
-  fetchGames();
-}, [page]);
-
-  const handleDelete = async (gameId, gameTitle) => {
-    const confirmDelete = window.confirm(`Are you absolutely sure you want to delete "${gameTitle}"? This cannot be undone.`);
-    if (!confirmDelete) return;
-
-    const res = await DeleteGameAPI(gameId);
-
-    if (res.message && res.message.includes("deleted") || res.msg && res.msg.includes("deleted")) {
-      setGames(games.filter((game) => game._id !== gameId));
-    } else {
-      alert(res.message || res.msg || "Failed to delete game.");
-    }
-  };
-
-  if (loading) {
-    return <div className="text-[#00e6e6] font-bold p-4 bg-navbgclr rounded-lg border border-[#333] animate-pulse">Loading games database...</div>;
-  }
-
-  return (
-  <div>
-
-    <div className="hidden md:block bg-navbgclr rounded-lg border border-[#333] overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-[#1a1e24]">
-            <tr className="border-b border-[#333] text-[#b3b3b3] text-sm uppercase tracking-wider">
-              <th className="p-4 w-20">Cover</th>
-              <th className="p-4">Game Title</th>
-              <th className="p-4">Developer</th>
-              <th className="p-4">Release Year</th>
-              <th className="p-4 text-center">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {games.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="5"
-                  className="p-4 text-center text-gray-500"
-                >
-                  No games found in database.
-                </td>
-              </tr>
-            ) : (
-              games.map((game) => (
-                <tr
-                  key={game._id}
-                  className="border-b border-[#333]"
-                >
-                  <td className="p-4">
-                    <img
-                      src={game.coverImage || 'https://via.placeholder.com/150'}
-                      alt={game.title}
-                      className="w-12 h-12 rounded object-cover"
-                    />
-                  </td>
-
-                  <td className="p-4 font-bold text-white">
-                    {game.title}
-                  </td>
-
-                  <td className="p-4 text-gray-400">
-                    {game.developer}
-                  </td>
-
-                  <td className="p-4 text-gray-400">
-                    {game.releaseDate
-                      ? game.releaseDate.toString().split('-')[0]
-                      : 'N/A'}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    <button
-                      onClick={() =>
-                        handleDelete(game._id, game.title)
-                      }
-                      className="text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition-colors"
-                    >
-                      Delete Game
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-      <div className="flex gap-4 items-center justify-center py-6">
-  
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(prev => prev - 1)}
-          className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
-        >
-          Prev
-        </button>
-
-        <span className="text-white font-bold text-lg">
-          {page}
-        </span>
-
-        <button
-          disabled={page === totalpage}
-          onClick={() => setPage(prev => prev + 1)}
-          className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
-        >
-          Next
-        </button>
-
-      </div>
-      </div>
-    </div>
-
-    <div className="md:hidden space-y-4">
-
-      {games.length === 0 ? (
-        <div className="text-center text-gray-500 py-6">
-          No games found in database.
-        </div>
-      ) : (
-        games.map((game) => (
-          <div
-            key={game._id}
-            className="bg-navbgclr border border-[#333] rounded-xl p-4"
-          >
-
-            <div className="flex gap-4">
-
-              <img
-                src={game.coverImage || 'https://via.placeholder.com/150'}
-                alt={game.title}
-                className="w-20 h-24 rounded-lg object-cover"
-              />
-
-              <div className="flex-1">
-
-                <h3 className="font-bold text-white text-lg">
-                  {game.title}
-                </h3>
-
-                <p className="text-sm text-gray-400 mt-1">
-                  {game.developer || "Unknown Developer"}
-                </p>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Release Year:{" "}
-                  {game.releaseDate
-                    ? game.releaseDate.toString().split('-')[0]
-                    : 'N/A'}
-                </p>
-
-              </div>
-
-            </div>
-
-            <button
-              onClick={() =>
-                handleDelete(game._id, game.title)
-              }
-              className="w-full mt-4 text-sm font-bold bg-red-500/10 text-red-400 border border-red-500/30 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
-            >
-              Delete Game
-            </button>
-
-          </div>
-        ))
-      )}
-
-    </div>
-
-  </div>
-);
-};
-
-const ManageUsersView = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalpage, setTotalpage] = useState(1);
-
-  useEffect(() => {
-  const fetchUsers = async () => {
-    setLoading(true);
-
-    const data = await GetAllUsersAPI(page);
-
-    if (data && Array.isArray(data.users)) {
-      setUsers(data.users);
-      setTotalpage(data.totalpages || 1);
-    } else {
-      setUsers([]);
-      setTotalpage(1);
-    }
-
-    setLoading(false);
-  };
-
-  fetchUsers();
-}, [page]);
-
-  const handleBanToggle = async (userId) => {
-    const res = await ToggleBanUserAPI(userId);
-    
-    if (res.msg && res.msg.toLowerCase().includes("banned")) {
-        setUsers(users.map(user => 
-            user._id === userId ? { ...user, isBanned: res.isBanned } : user
-        ));
-    } else {
-        alert(res.msg || "Failed to update user.");
-    }
-  };
-
-  if (loading) {
-    return <div className="text-[#00e6e6] font-bold p-4 bg-navbgclr rounded-lg border border-[#333] animate-pulse">Loading user database...</div>;
-  }
-
-  return (
-  <div>
-
-    <div className="hidden md:block bg-navbgclr rounded-lg border border-[#333] overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-[#1a1e24]">
-            <tr className="border-b border-[#333] text-[#b3b3b3] text-sm uppercase">
-              <th className="p-4">Username</th>
-              <th className="p-4">Email</th>
-              <th className="p-4">Role</th>
-              <th className="p-4 text-center">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {users.map((user) => (
-              <tr
-                key={user._id}
-                className="border-b border-[#333]"
-              >
-                <td className="p-4 font-bold text-white">
-                  {user.username}
-                </td>
-
-                <td className="p-4 text-gray-400">
-                  {user.email}
-                </td>
-
-                <td className="p-4">
-                  <span
-                    className={`px-2 py-1 rounded text-[10px] font-black uppercase
-                    ${
-                      user.role === 'admin'
-                        ? 'bg-[#00e6e6] text-[#1a1e24]'
-                        : 'bg-gray-700 text-gray-300'
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
-
-                <td className="p-4 text-center">
-                  {user.role !== 'admin' ? (
-                    <button
-                      onClick={() => handleBanToggle(user._id)}
-                      className={`text-xs font-bold px-3 py-2 rounded
-                      ${
-                        user.isBanned
-                          ? 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white'
-                          : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white'
-                      }`}
-                    >
-                      {user.isBanned ? 'Unban User' : 'Ban User'}
-                    </button>
-                  ) : (
-                    <span className="text-xs text-gray-500">
-                      Admin
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-            <div className="flex gap-4 items-center justify-center py-6">
-
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(prev => prev - 1)}
-                className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
-              >
-                Prev
-              </button>
-
-              <span className="text-white font-bold text-lg">
-                {page}
-              </span>
-
-              <button
-                disabled={page === totalpage}
-                onClick={() => setPage(prev => prev + 1)}
-                className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-4 py-2 rounded font-bold disabled:opacity-40"
-              >
-                Next
-              </button>
-
-            </div>
-
-      </div>
-    </div>
-
-    <div className="md:hidden space-y-4">
-
-      {users.map((user) => (
-        <div
-          key={user._id}
-          className="bg-navbgclr border border-[#333] rounded-lg p-4"
-        >
-
-          <div className="flex justify-between items-start mb-3">
-
-            <div>
-              <h3 className="font-bold text-white">
-                {user.username}
-              </h3>
-
-              <p className="text-sm text-gray-400 break-all">
-                {user.email}
-              </p>
-            </div>
-
-            <span
-              className={`px-2 py-1 rounded text-[10px] font-black uppercase
-              ${
-                user.role === 'admin'
-                  ? 'bg-[#00e6e6] text-[#1a1e24]'
-                  : 'bg-gray-700 text-gray-300'
-              }`}
-            >
-              {user.role}
-            </span>
-
-          </div>
-
-          {user.role !== 'admin' ? (
-            <button
-              onClick={() => handleBanToggle(user._id)}
-              className={`w-full text-sm font-bold py-2 rounded
-              ${
-                user.isBanned
-                  ? 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white'
-                  : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white'
-              }`}
-            >
-              {user.isBanned ? 'Unban User' : 'Ban User'}
-            </button>
-          ) : (
-            <div className="text-center text-xs text-gray-500">
-              Admin Account
-            </div>
-          )}
-
-        </div>
-      ))}
-
-    </div>
-
-  </div>
-);
-};
+import ManageGamesView from '../../components/Admin/ManageGamesView';
+import ManageUsersView from '../../components/Admin/ManageUsersView';
+import ManageReportsView from '../../components/Admin/ManageReportsView';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -507,6 +115,13 @@ const AdminDashboard = () => {
         >
           Manage Users
         </button>
+
+        <button
+          onClick={() => setActiveTab('manageReports')}
+          className={`${getTabClass('manageReports')} min-w-fit`}
+        >
+          Manage Reports
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -522,7 +137,7 @@ const AdminDashboard = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 hover:border-[#00e6e6]/30 transition-all duration-300">
+                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 ">
                   <h3 className="text-[#b3b3b3] text-sm mb-2">
                     Total Users
                   </h3>
@@ -532,7 +147,7 @@ const AdminDashboard = () => {
                   </p>
                 </div>
 
-                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 hover:border-[#00e6e6]/30 transition-all duration-300">
+                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 ">
                   <h3 className="text-[#b3b3b3] text-sm mb-2">
                     Games in Database
                   </h3>
@@ -542,7 +157,7 @@ const AdminDashboard = () => {
                   </p>
                 </div>
 
-                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 hover:border-[#00e6e6]/30 transition-all duration-300">
+                <div className="bg-navbgclr p-6 rounded-xl border border-white/10 ">
                   <h3 className="text-[#b3b3b3] text-sm mb-2">
                     Number of Reviews
                   </h3>
@@ -628,6 +243,18 @@ const AdminDashboard = () => {
               </h1>
 
               <ManageUsersView />
+
+            </div>
+          )}
+
+          {activeTab === 'manageReports' && (
+            <div className="animate-fade-in space-y-6">
+
+              <h1 className="text-2xl md:text-3xl font-bold">
+                Manage Review Reports
+              </h1>
+
+              <ManageReportsView />
 
             </div>
           )}

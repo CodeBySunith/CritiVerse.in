@@ -81,6 +81,63 @@ export const TopGames = async () => {
     }
 }
 
+export const TopPCGames = async () => {
+  try{
+    const res = await fetch(`${baseUrl}/game/toppcgames`)
+    if(!res.ok){
+      console.error(`Server Error: ${res.status}`);
+      return null;
+    }
+    return await res.json();
+    } catch (e) {
+        console.error("Fetch operation failed:", e);
+        return null;
+    }
+}
+
+export const TopPSGames = async () => {
+  try{
+    const res = await fetch(`${baseUrl}/game/toppsgames`)
+    if(!res.ok){
+      console.error(`Server Error: ${res.status}`);
+      return null;
+    }
+    return await res.json();
+    } catch (e) {
+        console.error("Fetch operation failed:", e);
+        return null;
+    }
+}
+
+export const TopXBGames = async () => {
+  try{
+    const res = await fetch(`${baseUrl}/game/topxbgames`)
+    if(!res.ok){
+      console.error(`Server Error: ${res.status}`);
+      return null;
+    }
+    return await res.json();
+    } catch (e) {
+        console.error("Fetch operation failed:", e);
+        return null;
+    }
+}
+
+export const TopMobileGames = async () => {
+  try{
+    const res = await fetch(`${baseUrl}/game/topmobilegames`)
+    if(!res.ok){
+      console.error(`Server Error: ${res.status}`);
+      return null;
+    }
+    return await res.json();
+    } catch (e) {
+        console.error("Fetch operation failed:", e);
+        return null;
+    }
+}
+
+
 export const GetSingleGame = async (id) => {
   try {
     const res = await fetch(`${baseUrl}/game/singlegame/${id}`);

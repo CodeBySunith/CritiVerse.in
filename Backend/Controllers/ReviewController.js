@@ -1,5 +1,6 @@
 const GameDB = require('../Models/GameModel.js');
 const ReviewDB = require('../Models/ReviewModel.js');
+const ReviewReport = require('../Models/ReportModel.js')
 const mongoose = require('mongoose');
 
 const ShowMyReview = async (req, res) => {
@@ -8,8 +9,6 @@ const ShowMyReview = async (req, res) => {
 
     try {
         const Review = await ReviewDB.findOne({ userid: userID, gameid: _id })
-            .populate('userid', 'name avatarURL')
-            .populate('gameid', '_id');
 
         if (!Review) {
             return res.status(404).json({ msg: "Not Reviewed yet" });
@@ -123,34 +122,40 @@ UpdateReview = async (req, res) => {
 
 
 
-const DeleteReview = async (req, res) => {
+const DeleteMyReview = async (req, res) => {
+  const gameId = req.params._id;
+  const userId = req.user._id;
 
-    const { _id } = req.params;
-    const userID = req.user._id;
+  try {
+    const deletedReview = await ReviewDB.findOneAndDelete({
+      userid: userId,
+      gameid: gameId,
+    });
 
-    try {
-
-        const deleted = await ReviewDB.findOneAndDelete({ userid: userID, gameid: _id });
-
-        if (!deleted) {
-            return res.status(404).json({ msg: "Review not found" });
-        }
-
-        if (deleted) {
-            await recalculateGameRating(_id);
-        }
-
-        return res.status(200).json({ msg: "Review deleted successfully" });
-    } catch (e) {
-        return res.status(500).json({ msg: "Server Error", error: e.message });
+    if (!deletedReview) {
+      return res.status(404).json({
+        msg: "Review not found",
+      });
     }
-}
+
+    await recalculateGameRating(gameId);
+
+    return res.status(200).json({
+      msg: "Review deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Server Error",
+      error: error.message,
+    });
+  }
+};
 
 const ShowNewReviews = async (req,res) => {
 
     try {
         
-        const newReviews = await ReviewDB.find().sort({createdAt : -1}).limit(6).populate('userid', 'name avatarURL').populate('gameid', 'title coverImage');
+        const newReviews = await ReviewDB.find().sort({createdAt : -1}).limit(6).populate('userid', 'username avatarURL').populate('gameid', 'title coverImage');
 
         if(!newReviews || newReviews.length === 0){
             return res.status(404).json({msg: "No Reviews yet"})
@@ -179,7 +184,7 @@ const ShowGameReviews = async (req, res) => {
     try {
         const gameReviews = await ReviewDB.find({ gameid: _id })
             .sort({ createdAt: -1 })
-            .populate('userid', 'name avatarURL')
+            .populate('userid', 'username avatarURL')
             .populate('gameid', 'title coverImage');
 
         return res.status(200).json({ gameReviews: gameReviews || [] });
@@ -188,6 +193,62 @@ const ShowGameReviews = async (req, res) => {
     }
 };
 
+const reportReview = async (req, res) => {
+  try {
+    const { reviewId, reason } = req.body;
+
+    const report = await ReviewReport.create({
+      reporterId: req.user._id,
+      reviewId,
+      reason,
+    });
+
+    res.status(201).json({
+      msg: "Reported successfully",
+      report,
+    });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to report review" });
+  }
+};
+
+const getReviewReports = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const skip = (page - 1) * limit;
+
+    const [reports, total] = await Promise.all([
+      ReviewReport.find()
+        .populate("reporterId", "username email")
+        .populate({
+          path: "reviewId",
+          populate: {
+            path: "userid",
+            select: "username email",
+          },
+        })
+        .sort({ createdAt: -1 }) // ✅ sort BEFORE pagination (important)
+        .skip(skip)
+        .limit(limit),
+
+        
+        
+      ReviewReport.countDocuments(),
+    ]);
+    
+
+    return res.status(200).json({
+      reports,
+      totalpages: Math.ceil(total / limit) || 1,
+      page,
+    });
+  } catch (err) {
+    console.error("getReviewReports error:", err);
+    return res.status(500).json({ msg: "Failed to fetch reports" });
+  }
+};
 
 
-module.exports = { AddReview, DeleteReview, UpdateReview, ShowMyReview, ShowAllMyReview,ShowNewReviews,ReviewCount,ShowGameReviews};
+
+module.exports = { AddReview, DeleteMyReview, UpdateReview, ShowMyReview, ShowAllMyReview,ShowNewReviews,ReviewCount,ShowGameReviews, reportReview, getReviewReports};

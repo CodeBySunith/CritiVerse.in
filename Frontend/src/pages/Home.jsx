@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NewGames,TopGames } from '../api/GameAPI';
+import { NewGames,TopGames, TopPCGames, TopPSGames, TopXBGames, TopMobileGames } from '../api/GameAPI';
 import {NewReviews} from '../api/ReviewAPI'
 import Carousel from '../components/Design/Carousel'
 import CategoryCard from '../components/Cards/CategoryCard';
@@ -12,17 +12,24 @@ import Footer from '../components/Footer/Footer';
 const Home = () => {
   const [newReleases, setNewReleases] = useState([]);
   const [topratedGames, setTopratedGames] = useState([]);
+  const [toppcGames, setTopPCGames] = useState([]);
+  const [toppsGames, setTopPSGames] = useState([]);
+  const [topxbGames, setTopXBGames] = useState([]);
+  const [topmobileGames, setTopMobileGames] = useState([]);
   const [newReviews, setNewReviews] = useState([])
 
 
   useEffect(() => {
     const getGamesData = async () => {
 
-       const [newReleseData, topratedData, newReviewsData] = await Promise.all([
+       const [newReleseData, topratedData, newReviewsData, toppcGameData, toppsGameData, topxbGameData, topmobileGameData] = await Promise.all([
           NewGames(),
           TopGames(),
-          NewReviews()
-
+          NewReviews(),
+          TopPCGames(),
+          TopPSGames(),
+          TopXBGames(),
+          TopMobileGames()
         ]);
 
       if (newReleseData && newReleseData.games) {
@@ -35,6 +42,22 @@ const Home = () => {
 
       if (newReviewsData && newReviewsData.newReviews){
         setNewReviews(newReviewsData.newReviews)
+      }
+
+      if (toppcGameData && toppcGameData.games){
+        setTopPCGames(toppcGameData.games)
+      }
+
+      if (toppsGameData && toppsGameData.games){
+        setTopPSGames(toppsGameData.games)
+      }
+
+      if (topxbGameData && topxbGameData.games){
+        setTopXBGames(topxbGameData.games)
+      }
+      
+      if (topmobileGameData && topmobileGameData.games){
+        setTopMobileGames(topmobileGameData.games)
       }
 
     };
@@ -58,6 +81,27 @@ const Home = () => {
         title="New Releases"  
         games={newReleases} 
       />
+
+      <Carousel 
+        title="Top Mobile Games" 
+        games={topmobileGames} 
+      />
+
+      <Carousel 
+        title="Top PC Games" 
+        games={toppcGames} 
+      />
+
+      <Carousel 
+        title="Top PlayStation Games" 
+        games={toppsGames} 
+      />
+
+      <Carousel 
+        title="Top Xbox Games" 
+        games={topxbGames} 
+      />
+
 
 
 <div className=' text-[#00e6e6] flex items-center gap-x-2'>

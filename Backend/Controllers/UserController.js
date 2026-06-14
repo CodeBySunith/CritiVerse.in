@@ -263,13 +263,29 @@ const GetAllUsers = async (req, res) => {
     const limit = 15;
     const skip = (page - 1) * limit;
 
+    const search = req.query.search || "";
+
+    let filter = {
+      role: { $nin: ["admin", "moderator"] } // ✅ HIDE THESE ROLES
+    };
+
+    if (search) {
+      filter = {
+        ...filter,
+        $or: [
+          { username: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } }
+        ]
+      };
+    }
+
     const [users, totalDocuments] = await Promise.all([
-      UserDB.find({})
+      UserDB.find(filter)
         .skip(skip)
         .limit(limit)
         .lean(),
 
-      UserDB.countDocuments({})
+      UserDB.countDocuments(filter)
     ]);
 
     return res.status(200).json({

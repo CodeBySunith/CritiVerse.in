@@ -58,7 +58,7 @@ export default function HeroSlider() {
               </p>
 
               <div className="pt-4">
-                <button className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-[1.2rem] py-2 rounded-sm font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24] cursor-pointer" onClick={()=>{Navigate('/login')}}>
+                <button className="bg-transparent border border-[#00e6e6] text-[#00e6e6] px-[1.2rem] py-2 rounded-sm font-bold transition-all duration-300 ease-out whitespace-nowrap hover:bg-[#00e6e6] hover:text-[#1a1e24] cursor-pointer" onClick={()=>{Navigate('/browse')}}>
                   Get Started
                 </button>
               </div>

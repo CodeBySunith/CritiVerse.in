@@ -1,6 +1,5 @@
 import React from 'react'
-import logo from '../../assets/Admin.jpeg'
-import { FaThumbsUp, FaThumbsDown, FaFlag } from 'react-icons/fa6'
+import { MdOutlineReport } from "react-icons/md";
 import { Link } from 'react-router-dom'
 
 const Reviewcard = ({ review }) => {
@@ -48,7 +47,7 @@ const Reviewcard = ({ review }) => {
             <div className='flex items-center gap-2'>
               <img className='md:h-10 md:w-10 w-8 h-8 rounded-full object-cover' src={review.userid?.avatarURL} alt={review.userid?.name} />
               <h1 className='text-white md:text-base text-sm font-medium hover:text-[#00e6e6] transition-colors'>
-                {review.userid?.name || "Anonymous"}
+                @{review.userid?.username || "Anonymous"}
               </h1>
             </div>
             </Link>
@@ -61,20 +60,8 @@ const Reviewcard = ({ review }) => {
         
         <div className='flex items-center gap-4 p-2.5 justify-center md:text-base text-sm'>
             <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Like"><FaThumbsUp className='text-green-700 hover:text-green-500 transition-colors'/></button>
-                <p className='text-secText text-xs'>{review.like || 0}</p>
+                <button aria-label="Report"><MdOutlineReport className='text-2xl md:text-3xl text-white hover:text-red-500 transition-colors'/></button>
             </div>
-
-            <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Dislike"><FaThumbsDown className='text-red-700 hover:text-red-500 transition-colors'/></button>
-             
-                <p className='text-secText text-xs'>{review.dislike || 0}</p>
-            </div>
-
-            <div className='flex gap-x-1.5 items-center'>
-                <button aria-label="Report"><FaFlag className='text-white hover:text-red-500 transition-colors'/></button>
-            </div>
-            
         </div>
       </div>
 

@@ -67,16 +67,11 @@ const SearchBar = () => {
     >
       <div className="flex items-center w-full bg-navbgclr border border-[#333] rounded-lg py-1.5 pl-4 pr-2 transition-colors duration-300 focus-within:border-[#00e6e6]">
         
-        {searchQuery && (
-          <button 
-            type="button" 
-            onClick={clearSearch} 
-            className="text-[#888] hover:text-[#ff4d4d] text-lg p-1.5 flex items-center transition-colors"
-            aria-label="Clear text input"
-          >
-            <IoCloseCircleOutline />
-          </button>
-        )}
+        <span 
+          className="text-[#888]text-lg p-2 flex items-center justify-center transition-colors"
+        >
+          <IoSearchOutline />
+        </span>
 
         <input
           type="text"
@@ -87,13 +82,16 @@ const SearchBar = () => {
           className="flex-1 bg-transparent border-none text-white outline-none text-sm px-2 text-center placeholder-[#666]"
         />
 
-        <button 
-          type="submit" 
-          className="text-[#888] hover:text-[#00e6e6] text-lg p-2 flex items-center justify-center transition-colors"
-          aria-label="Submit search query"
-        >
-          <IoSearchOutline />
-        </button>
+        {searchQuery && (
+          <button 
+            type="button" 
+            onClick={clearSearch} 
+            className="text-[#888] hover:text-[#ff4d4d] text-lg p-1.5 flex items-center transition-colors"
+            aria-label="Clear text input"
+          >
+            <IoCloseCircleOutline />
+          </button>
+        )}
       </div>
 
       {showSuggestions && searchResults.length > 0 && (
