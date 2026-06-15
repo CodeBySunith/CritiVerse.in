@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const reviewReportSchema = mongoose.Schema(
   {
@@ -21,12 +21,17 @@ const reviewReportSchema = mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "reviewed", "resolved", "rejected"],
+      enum: ["pending", "resolved", "rejected"],
       default: "pending",
     },
   },
   { timestamps: true }
 );
 
-const ReportDB = mongoose.model("ReviewReport", reviewReportSchema);
-module.exports = ReportDB
+reviewReportSchema.index(
+  { reporterId: 1, reviewId: 1 },
+  { unique: true }
+);
+
+const ReviewReport = mongoose.model("ReviewReport", reviewReportSchema);
+module.exports = ReviewReport;

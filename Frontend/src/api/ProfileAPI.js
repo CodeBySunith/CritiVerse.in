@@ -50,14 +50,16 @@ export const ChangePasswordAPI = async (
     return await res.json();
 };
 
-export const DeleteAccountAPI = async () => {
-    const res = await fetch(
-        `${baseUrl}/user/profile/delete`,
-        {
-            method: "DELETE",
-            credentials: "include"
-        }
-    );
 
-    return await res.json();
+export const DeleteAccountAPI = async (password) => {
+  const res = await fetch(`${baseUrl}/user/profile/delete`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ password }),
+  });
+
+  return await res.json();
 };

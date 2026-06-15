@@ -151,21 +151,6 @@ const DeleteMyReview = async (req, res) => {
   }
 };
 
-const ShowNewReviews = async (req,res) => {
-
-    try {
-        
-        const newReviews = await ReviewDB.find().sort({createdAt : -1}).limit(6).populate('userid', 'username avatarURL').populate('gameid', 'title coverImage');
-
-        if(!newReviews || newReviews.length === 0){
-            return res.status(404).json({msg: "No Reviews yet"})
-        }
-
-        return res.status(200).json({newReviews})
-    } catch (e) {
-        return res.status(500).json({ msg: "Server Error", error: e.message });
-    }
-}
 
 const ReviewCount = async (req, res) => {
     try {
@@ -178,16 +163,44 @@ const ReviewCount = async (req, res) => {
     
 }
 
+// const ShowGameReviews = async (req, res) => {
+//     const { _id } = req.params;
+
+//     try {
+//         const gameReviews = await ReviewDB.find({ gameid: _id })
+//             .sort({ createdAt: -1 })
+//             .populate('userid', 'username avatarURL')
+//             .populate('gameid', 'title coverImage');
+
+//         return res.status(200).json({ gameReviews: gameReviews || [] });
+//     } catch (e) {
+//         return res.status(500).json({ msg: "Server Error", error: e.message });
+//     }
+// };
+
 const ShowGameReviews = async (req, res) => {
     const { _id } = req.params;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 14;
+    const skip = (page - 1) * limit;
 
     try {
         const gameReviews = await ReviewDB.find({ gameid: _id })
             .sort({ createdAt: -1 })
             .populate('userid', 'username avatarURL')
-            .populate('gameid', 'title coverImage');
+            .populate('gameid', 'title coverImage')
+            .skip(skip)
+            .limit(limit);
 
-        return res.status(200).json({ gameReviews: gameReviews || [] });
+        const total = await ReviewDB.countDocuments({ gameid: _id });
+
+        return res.status(200).json({
+            gameReviews,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page
+        });
+
     } catch (e) {
         return res.status(500).json({ msg: "Server Error", error: e.message });
     }
@@ -196,6 +209,17 @@ const ShowGameReviews = async (req, res) => {
 const reportReview = async (req, res) => {
   try {
     const { reviewId, reason } = req.body;
+
+    const existing = await ReviewReport.findOne({
+      reporterId: req.user._id,
+      reviewId,
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        msg: "You have already reported this review",
+      });
+    }
 
     const report = await ReviewReport.create({
       reporterId: req.user._id,
@@ -212,43 +236,102 @@ const reportReview = async (req, res) => {
   }
 };
 
-const getReviewReports = async (req, res) => {
+const checkReportStatus = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 15;
-    const skip = (page - 1) * limit;
+    const { reviewId } = req.params;
 
-    const [reports, total] = await Promise.all([
-      ReviewReport.find()
-        .populate("reporterId", "username email")
-        .populate({
-          path: "reviewId",
-          populate: {
-            path: "userid",
-            select: "username email",
-          },
-        })
-        .sort({ createdAt: -1 }) // ✅ sort BEFORE pagination (important)
-        .skip(skip)
-        .limit(limit),
+    const existing = await ReviewReport.findOne({
+      reporterId: req.user._id,
+      reviewId,
+    });
 
-        
-        
-      ReviewReport.countDocuments(),
-    ]);
-    
-
-    return res.status(200).json({
-      reports,
-      totalpages: Math.ceil(total / limit) || 1,
-      page,
+    return res.json({
+      reported: !!existing,
     });
   } catch (err) {
-    console.error("getReviewReports error:", err);
-    return res.status(500).json({ msg: "Failed to fetch reports" });
+    return res.status(500).json({
+      reported: false,
+    });
+  }
+};
+
+const getAllReviewReports = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+
+    const reports = await ReviewReport.find()
+      .populate("reporterId")
+      .populate({
+        path: "reviewId",
+        populate: [
+          { path: "userid" },
+          { path: "gameid" }
+        ],
+      })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const total = await ReviewReport.countDocuments();
+
+    res.json({
+      reports,
+      totalpages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to fetch reports" });
+  }
+};
+
+const updateReportStatus = async (req, res) => {
+  try {
+    const { reportId, status } = req.body;
+
+    if (!reportId || !status) {
+      return res.status(400).json({ msg: "Missing reportId or status" });
+    }
+
+    const updated = await ReviewReport.findByIdAndUpdate(
+      reportId,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ msg: "Report not found" });
+    }
+
+    return res.json({
+      msg: "Status updated",
+      report: updated,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ msg: "Failed to update status" });
+  }
+};
+
+const deleteReport = async (req, res) => {
+  try {
+    const { reportId } = req.params;
+
+    if (!reportId) {
+      return res.status(400).json({ msg: "Missing reportId" });
+    }
+
+    const deleted = await ReviewReport.findByIdAndDelete(reportId);
+
+    if (!deleted) {
+      return res.status(404).json({ msg: "Report not found" });
+    }
+
+    return res.json({ msg: "Report deleted" });
+
+  } catch (err) {
+    return res.status(500).json({ msg: "Failed to delete report" });
   }
 };
 
 
-
-module.exports = { AddReview, DeleteMyReview, UpdateReview, ShowMyReview, ShowAllMyReview,ShowNewReviews,ReviewCount,ShowGameReviews, reportReview, getReviewReports};
+module.exports = { AddReview, DeleteMyReview, UpdateReview, ShowMyReview, ShowAllMyReview,ReviewCount,ShowGameReviews, reportReview, getAllReviewReports, checkReportStatus, updateReportStatus, deleteReport};

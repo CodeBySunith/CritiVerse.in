@@ -203,24 +203,52 @@ const ChangePassword = async (req, res) => {
     }
 };
 
+
 const DeleteAccount = async (req, res) => {
-    try {
+  try {
+    const userId = req.user._id;
 
-        await UserDB.findByIdAndDelete(req.user._id);
+    const password = req.body?.password;
 
-        res.clearCookie("token");
-
-        return res.status(200).json({
-            success: true,
-            msg: "Account Deleted"
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            msg: error.message
-        });
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        msg: "Password is required",
+      });
     }
+
+    const user = await UserDB.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        msg: "Incorrect password",
+      });
+    }
+
+    await UserDB.findByIdAndDelete(userId);
+
+    return res.json({
+      success: true,
+      msg: "Account deleted successfully",
+    });
+
+  } catch (err) {
+    console.log("DELETE ACCOUNT ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      msg: "Server error",
+    });
+  }
 };
 
 
@@ -266,7 +294,7 @@ const GetAllUsers = async (req, res) => {
     const search = req.query.search || "";
 
     let filter = {
-      role: { $nin: ["admin", "moderator"] } // ✅ HIDE THESE ROLES
+      role: { $nin: ["admin", "moderator"] }
     };
 
     if (search) {

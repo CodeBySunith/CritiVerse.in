@@ -1,19 +1,5 @@
 const baseUrl = 'http://localhost:8000'
 
-export const NewReviews = async () => {
-  try {
-    const res = await fetch(`${baseUrl}/review/newreviews`)
-    if (!res.ok) {
-        console.error(`Server Error: ${res.status}`);
-        return null;
-    }
-    return await res.json(); 
-  } catch (e) {
-    console.error("Fetch operation failed:", e);
-    return null;
-  }
-};
-
 export const GetMyGameReview = async (gameId) => {
     try {
         const response = await fetch(`${baseUrl}/review/myreview/${gameId}`, {
@@ -58,9 +44,9 @@ export const EditReviewAPI = async (gameId, reviewText, ratingScore) => {
     }
 };
 
-export const GetGameReviewsAPI = async (gameId) => {
+export const GetGameReviewsAPI = async (gameId, page = 1) => {
   try {
-    const res = await fetch(`${baseUrl}/review/gamereviews/${gameId}`);
+    const res = await fetch(`${baseUrl}/review/gamereviews/${gameId}?page=${page}`);
     if (!res.ok) {
         console.error(`Server Error: ${res.status}`);
         return { gameReviews: [] };
@@ -71,6 +57,7 @@ export const GetGameReviewsAPI = async (gameId) => {
     return { gameReviews: [] };
   }
 };
+
 
 
 export const GetMyReviewsAPI = async () => {
@@ -108,6 +95,7 @@ export const DeleteMyReviewAPI = async (gameId) => {
 };
 
 
+
 export const ReportReviewAPI = async (reviewId, reason) => {
   try {
     const res = await fetch(`${baseUrl}/review/report`, {
@@ -125,4 +113,20 @@ export const ReportReviewAPI = async (reviewId, reason) => {
   }
 };
 
+
+export const CheckReportAPI = async (reviewId) => {
+  try {
+    const res = await fetch(
+      `${baseUrl}/review/checkreport/${reviewId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    return await res.json();
+  } catch (err) {
+    return { reported: false };
+  }
+};
 

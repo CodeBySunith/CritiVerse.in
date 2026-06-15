@@ -15,6 +15,9 @@ const GamePage = () => {
   const { id } = useParams(); 
   const { user } = useAuth(); 
 
+  const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+
   const [gameReviews, setGameReviews] = useState([]); 
   const [myreview, setMyreview] = useState(null); 
   const [loadingMyReview, setLoadingMyReview] = useState(true);
@@ -28,41 +31,40 @@ const GamePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getGamesData = async () => {
-    try {
-      setLoadingMyReview(true);
-      
-      const [gameReviewsData, myreviewData] = await Promise.all([
-        GetGameReviewsAPI(id),
-        GetMyGameReview(id)
-      ]);
+  try {
+    setLoadingMyReview(true);
 
-      if (gameReviewsData && gameReviewsData.gameReviews) {
-        setGameReviews(gameReviewsData.gameReviews); 
-      }
-      if (myreviewData && myreviewData.review){
-        setMyreview(myreviewData.review);
-        setReviewInput(myreviewData.review.review || ""); 
-        setRating(myreviewData.review.rating || 0);
+    const [gameReviewsData, myreviewData] = await Promise.all([
+      GetGameReviewsAPI(id, page),
+      GetMyGameReview(id)
+    ]);
 
-        setOriginalReview(myreviewData.review.review || "");
-        setOriginalRating(myreviewData.review.rating || 0);
-      } else {
-              setMyreview(null);
-              setReviewInput("");
-            }
-      
-      
-    } catch (error) {
-      console.error("Error fetching page layout data:", error);
-    } finally {
-      setLoadingMyReview(false);
+    if (gameReviewsData?.gameReviews) {
+      setGameReviews(gameReviewsData.gameReviews);
+      setTotalPages(gameReviewsData.totalPages || 1);
     }
-  };
+
+    if (myreviewData?.review) {
+      setMyreview(myreviewData.review);
+      setReviewInput(myreviewData.review.review || "");
+      setRating(myreviewData.review.rating || 0);
+      setOriginalReview(myreviewData.review.review || "");
+      setOriginalRating(myreviewData.review.rating || 0);
+    } else {
+      setMyreview(null);
+      setReviewInput("");
+    }
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingMyReview(false);
+  }
+};
 
   useEffect(() => {
-    getGamesData();
-  }, [id]);
-
+  getGamesData();
+}, [id, page]);
 
   const handleReviewSubmit = async (e) => {
   e.preventDefault();
@@ -241,6 +243,28 @@ const openEditForm = () => {
           ))
         )}
       </div>
+
+      <div className="flex justify-center items-center gap-4 mt-6">
+  <button
+    disabled={page === 1}
+    onClick={() => setPage((p) => p - 1)}
+    className="px-4 py-2 border border-[#00e6e6] text-[#00e6e6] rounded disabled:opacity-40"
+  >
+    Prev
+  </button>
+
+  <span className="text-white font-bold">
+    {page} / {totalPages}
+  </span>
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage((p) => p + 1)}
+    className="px-4 py-2 border border-[#00e6e6] text-[#00e6e6] rounded disabled:opacity-40"
+  >
+    Next
+  </button>
+</div>
 
     </div>
     <Footer/>

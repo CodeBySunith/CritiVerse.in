@@ -8,7 +8,6 @@ const MyReviewCard = ({ review, onDelete }) => {
   return (
     <div className="flex flex-col max-w-full bg-navbgclr p-3 rounded-lg border border-white/5 shadow-md">
 
-      {/* Rating + Review */}
       <div className="flex gap-4 pb-5">
         <div className="flex flex-col gap-y-1.5 p-2.5 w-full">
 
@@ -33,10 +32,8 @@ const MyReviewCard = ({ review, onDelete }) => {
 
       <hr className="border-neutral-800 mb-3" />
 
-      {/* Footer */}
       <div className="flex justify-between items-center">
 
-        {/* Date */}
         <div className="flex pt-1 pl-2">
           <p className="text-secText text-xs">
             {`${review.createdAt === review.updatedAt ? "Review added on" : "Review edited on"} ${
@@ -51,7 +48,6 @@ const MyReviewCard = ({ review, onDelete }) => {
           </p>
         </div>
 
-        {/* Delete Button */}
         <div className="flex gap-x-1.5 items-center">
           <button
             aria-label="Delete"

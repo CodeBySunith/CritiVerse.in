@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NewGames,TopGames, TopPCGames, TopPSGames, TopXBGames, TopMobileGames } from '../api/GameAPI';
-import {NewReviews} from '../api/ReviewAPI'
 import Carousel from '../components/Design/Carousel'
-import CategoryCard from '../components/Cards/CategoryCard';
-import Reviewcard from '../components/Cards/Reviewcard';
 import { Link } from 'react-router-dom';
 import HeroSlider from '../components/Design/HeroSlider'
 import Navbar from '../components/Navbar/Navbar';
@@ -16,16 +13,14 @@ const Home = () => {
   const [toppsGames, setTopPSGames] = useState([]);
   const [topxbGames, setTopXBGames] = useState([]);
   const [topmobileGames, setTopMobileGames] = useState([]);
-  const [newReviews, setNewReviews] = useState([])
 
 
   useEffect(() => {
     const getGamesData = async () => {
 
-       const [newReleseData, topratedData, newReviewsData, toppcGameData, toppsGameData, topxbGameData, topmobileGameData] = await Promise.all([
+       const [newReleseData, topratedData, toppcGameData, toppsGameData, topxbGameData, topmobileGameData] = await Promise.all([
           NewGames(),
           TopGames(),
-          NewReviews(),
           TopPCGames(),
           TopPSGames(),
           TopXBGames(),
@@ -38,10 +33,6 @@ const Home = () => {
 
       if (topratedData && topratedData.games){
         setTopratedGames(topratedData.games)
-      }
-
-      if (newReviewsData && newReviewsData.newReviews){
-        setNewReviews(newReviewsData.newReviews)
       }
 
       if (toppcGameData && toppcGameData.games){
@@ -101,27 +92,6 @@ const Home = () => {
         title="Top Xbox Games" 
         games={topxbGames} 
       />
-
-
-
-<div className=' text-[#00e6e6] flex items-center gap-x-2'>
-  <div className='bg-[#00e6e6] max-w-fit sm:p-1 p-0.2 sm:py-3 py-0 '>
-          <h1>|</h1>
-  </div>
-  <h1 className='text-sm sm:text-4xl font-extrabold uppercase'>Recently Reviewed ❯</h1>
-  </div>
-<div className='grid gap-3 lg:grid-cols-2 grid-cols-1 w-full'>
-  
-  {!newReviews || newReviews.length === 0 ? (
-    <div className="text-gray-400 p-4 col-span-full text-center">
-      Loading recent reviews...
-    </div>
-  ) : (
-    newReviews.map((item) => (
-      <Reviewcard key={item._id} review={item} />
-    ))
-  )}
-</div>
 
  
 

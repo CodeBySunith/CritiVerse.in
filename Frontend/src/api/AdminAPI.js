@@ -135,3 +135,32 @@ export const GetAllReviewReportsAPI = async (page = 1) => {
     return { reports: [] };
   }
 };
+
+
+export const UpdateReportStatusAPI = async (reportId, status) => {
+  const url = `${baseUrl}/review/reportstatus`;
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ reportId, status }),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  return data;
+};
+
+export const DeleteReportAPI = async (reportId) => {
+  try {
+    const res = await fetch(`${baseUrl}/review/report/${reportId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    return await res.json();
+  } catch (err) {
+    return { msg: "Request failed" };
+  }
+};
