@@ -19,7 +19,7 @@ Router.put('/profile/update', AuthMW, UserController.UpdateProfile);
 
 Router.put('/profile/password', AuthMW, UserController.ChangePassword);
 
-Router.delete('/profile/delete', AuthMW, UserController.DeleteAccount);
+// Router.delete('/profile/delete', AuthMW, UserController.DeleteAccount);
 
 
 module.exports = Router

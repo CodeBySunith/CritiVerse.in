@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginAPI } from '../../api/AuthenticationAPI';
 import { useAuth } from '../../Context/AuthContext';
-import { FaEnvelope, FaLock } from 'react-icons/fa6'
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa6'
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -16,7 +16,8 @@ const Login = () => {
     });
 
     const [error, setError] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         setform({
@@ -25,11 +26,14 @@ const Login = () => {
         });
     };
 
+    const togglePassword = () => {
+        setShowPassword(prev => !prev);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
-        
         if (form.email.trim() === '') {
             setError("Please enter your email.");
             return;
@@ -51,7 +55,11 @@ const Login = () => {
             const res = await LoginAPI(form);
 
             if (res.success) {
-                login({ name: res.username, role: res.role, avatarURL: res.avatar });
+                login({
+                    name: res.username,
+                    role: res.role,
+                    avatarURL: res.avatar
+                });
 
                 if (res.role === 'admin') {
                     navigate("/admin/dashboard");
@@ -80,10 +88,14 @@ const Login = () => {
                         <h1>Sign in</h1>
                     </div>
 
-                    <div className='group relative flex items-center w-3xs bg-[#1a1a1a] border border-[#333] rounded-[25px] pt-0.5 pb-0.5 pr-1.5 pl-3.5 mb-2 transition-colors duration-300 ease-in-out focus-within:border-[#00e6e6]'>
-                        <div className='absolute text-xl text-gray-500 group-focus-within:text-[#00e6e6] transition-colors'><FaEnvelope /></div>
+                    {/* EMAIL */}
+                    <div className='group relative flex items-center w-3xs bg-[#1a1a1a] border border-[#333] rounded-[25px] pl-3.5 pr-1.5 mb-2 transition-colors duration-300 ease-in-out focus-within:border-[#00e6e6]'>
+                        <div className='absolute text-xl text-gray-500 group-focus-within:text-[#00e6e6] transition-colors'>
+                            <FaEnvelope />
+                        </div>
+
                         <input
-                            className='flex-1 text-center bg-transparent border-none text-white outline-none text-sm min-w-0 py-2 px-6'
+                            className='flex-1 text-center bg-transparent border-none text-white outline-none text-sm py-2 px-6'
                             type="email"
                             placeholder="Email"
                             name='email'
@@ -92,34 +104,44 @@ const Login = () => {
                         />
                     </div>
 
-                    <div className='group relative flex items-center w-3xs bg-[#1a1a1a] border border-[#333] rounded-[25px] pt-0.5 pb-0.5 pr-1.5 pl-3.5 transition-colors duration-300 ease-in-out focus-within:border-[#00e6e6]'>
-                        <div className='absolute text-xl text-gray-500 group-focus-within:text-[#00e6e6] transition-colors'><FaLock /></div>
+                    {/* PASSWORD */}
+                    <div className='group relative flex items-center w-3xs bg-[#1a1a1a] border border-[#333] rounded-[25px] pl-3.5 pr-2 transition-colors duration-300 ease-in-out focus-within:border-[#00e6e6]'>
+
+                        <div className='absolute text-xl text-gray-500 group-focus-within:text-[#00e6e6] transition-colors'>
+                            <FaLock />
+                        </div>
+
                         <input
-                            className='flex-1 text-center bg-transparent border-none text-white outline-none text-sm min-w-0 py-2 px-6'
-                            type="password"
+                            className='flex-1 text-center bg-transparent border-none text-white outline-none text-sm py-2 px-6'
+                            type={showPassword ? "text" : "password"}
                             placeholder="Password"
                             name='password'
                             value={form.password}
                             onChange={handleChange}
                         />
+
+                        <button
+                            type="button"
+                            onClick={togglePassword}
+                            className="text-gray-400 hover:text-[#00e6e6] transition-colors text-sm"
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
                     </div>
 
                     {error && (
-                        <div className='text-[#ff4d4d] text-sm font-semibold text-center max-w-3xs transition-all'>
+                        <div className='text-[#ff4d4d] text-sm font-semibold text-center max-w-3xs'>
                             <p>{error}</p>
                         </div>
                     )}
 
-                    <div>
-                  
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="bg-transparent border border-[#00e6e6] text-[#00e6e6] py-2 px-5 rounded font-bold whitespace-nowrap cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#00e6e6] hover:text-[#1a1e24] w-3xs disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isSubmitting ? "Signing in..." : "Log In"}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-transparent border border-[#00e6e6] text-[#00e6e6] py-2 px-5 rounded font-bold cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#00e6e6] hover:text-[#1a1e24] w-3xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isSubmitting ? "Signing in..." : "Log In"}
+                    </button>
 
                     <div className='text-[#b3b3b3] hover:text-[#00e6e6] text-sm transition-colors mt-2'>
                         <Link to="/signup">Don't have an Account? Sign up</Link>

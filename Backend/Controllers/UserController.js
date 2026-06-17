@@ -204,52 +204,52 @@ const ChangePassword = async (req, res) => {
 };
 
 
-const DeleteAccount = async (req, res) => {
-  try {
-    const userId = req.user._id;
+// const DeleteAccount = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
 
-    const password = req.body?.password;
+//     const password = req.body?.password;
 
-    if (!password) {
-      return res.status(400).json({
-        success: false,
-        msg: "Password is required",
-      });
-    }
+//     if (!password) {
+//       return res.status(400).json({
+//         success: false,
+//         msg: "Password is required",
+//       });
+//     }
 
-    const user = await UserDB.findById(userId);
+//     const user = await UserDB.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        msg: "User not found",
-      });
-    }
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         msg: "User not found",
+//       });
+//     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+//     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        msg: "Incorrect password",
-      });
-    }
+//     if (!isMatch) {
+//       return res.status(400).json({
+//         success: false,
+//         msg: "Incorrect password",
+//       });
+//     }
 
-    await UserDB.findByIdAndDelete(userId);
+//     await UserDB.findByIdAndDelete(userId);
 
-    return res.json({
-      success: true,
-      msg: "Account deleted successfully",
-    });
+//     return res.json({
+//       success: true,
+//       msg: "Account deleted successfully",
+//     });
 
-  } catch (err) {
-    console.log("DELETE ACCOUNT ERROR:", err);
-    return res.status(500).json({
-      success: false,
-      msg: "Server error",
-    });
-  }
-};
+//   } catch (err) {
+//     console.log("DELETE ACCOUNT ERROR:", err);
+//     return res.status(500).json({
+//       success: false,
+//       msg: "Server error",
+//     });
+//   }
+// };
 
 
 
@@ -404,5 +404,4 @@ const Verify = async (req, res) => {
 
 module.exports = {CreateUser,LoginUser,LogoutUser,UserCount,GetAllUsers,ToggleBanUser,Verify,GetProfile,
     UpdateProfile,
-    ChangePassword,
-    DeleteAccount}
+    ChangePassword}

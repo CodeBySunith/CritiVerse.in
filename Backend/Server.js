@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+require("dotenv").config
 const cookieParser = require('cookie-parser');
 
 app.use(cors({
@@ -23,8 +24,7 @@ app.use('/review', ReviewRouter);
 app.use('/game', GameRouter);
 app.use('/list', ListRouter);
 
-const port = 8000;
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
     console.log("Critiverse Server is Online");
 });
